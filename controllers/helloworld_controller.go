@@ -18,7 +18,7 @@ package controllers
 
 import (
 	"context"
-
+	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -47,9 +47,26 @@ type HelloWorldReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.11.0/pkg/reconcile
 func (r *HelloWorldReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	_ = log.FromContext(ctx)
+	logger := log.FromContext(ctx)
 
 	// TODO(user): your logic here
+	hw := &demov1alpha1.HelloWorld{}
+	err := r.Get(ctx, client.ObjectKey{Namespace: req.Namespace, Name: req.Name}, hw)
+	if err != nil {
+		if errors.IsNotFound(err) {
+			// CR deleted, do cleanup if needed
+			logger.Info("HelloWorld CR was deleted", "name", req.Name)
+			return ctrl.Result{}, nil
+		} else {
+			logger.Error(err, "Failed to get CR", "name", req.Name)
+			// returning the error will trigger Reconcile again later on
+			return ctrl.Result{}, err
+		}
+	}
+
+	// CR was created or updated
+	// Compare with cluster state and take appropriate action
+	logger.Info("Reconciling HelloWorld CR", "name", hw.GetName(), "message", hw.Spec.Message)
 
 	return ctrl.Result{}, nil
 }
