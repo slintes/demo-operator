@@ -14,10 +14,10 @@ metadata:
         }
       ]
     capabilities: Basic Install
-    olm.properties: '[{"type": "olm.maxOpenShiftVersion", "value": "4.9"}]'
+    olm.properties: '[{"type": "olm.maxOpenShiftVersion", "value": "4.10"}]'
     operators.operatorframework.io/builder: operator-sdk-v1.19.0+git
     operators.operatorframework.io/project_layout: go.kubebuilder.io/v3
-  name: demo-operator.v0.0.1
+  name: demo-operator.v0.0.2
   namespace: placeholder
 spec:
   apiservicedefinitions: {}
@@ -118,7 +118,7 @@ spec:
                 - --leader-elect
                 command:
                 - /manager
-                image: quay.io/slintes/demo-operator:v0.0.1
+                image: quay.io/slintes/demo-operator:v0.0.2
                 livenessProbe:
                   httpGet:
                     path: /healthz
@@ -197,4 +197,4 @@ spec:
   maturity: alpha
   provider:
     name: slintes
-  version: 0.0.1
+  version: 0.0.2

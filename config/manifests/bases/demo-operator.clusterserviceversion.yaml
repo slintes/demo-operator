@@ -4,7 +4,7 @@ metadata:
   annotations:
     alm-examples: '[]'
     capabilities: Basic Install
-    olm.properties: '[{"type": "olm.maxOpenShiftVersion", "value": "4.9"}]'
+    olm.properties: '[{"type": "olm.maxOpenShiftVersion", "value": "4.10"}]'
   name: demo-operator.v0.0.0
   namespace: placeholder
 spec:
