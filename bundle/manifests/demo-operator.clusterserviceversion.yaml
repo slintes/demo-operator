@@ -14,6 +14,7 @@ metadata:
         }
       ]
     capabilities: Basic Install
+    olm.properties: '[{"type": "olm.maxOpenShiftVersion", "value": "4.9"}]'
     operators.operatorframework.io/builder: operator-sdk-v1.19.0+git
     operators.operatorframework.io/project_layout: go.kubebuilder.io/v3
   name: demo-operator.v0.0.1
@@ -117,7 +118,7 @@ spec:
                 - --leader-elect
                 command:
                 - /manager
-                image: controller:latest
+                image: quay.io/slintes/demo-operator:v0.0.1
                 livenessProbe:
                   httpGet:
                     path: /healthz
