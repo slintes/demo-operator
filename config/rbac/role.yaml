@@ -20,12 +20,6 @@ rules:
 - apiGroups:
   - demo.example.com
   resources:
-  - helloworlds/finalizers
-  verbs:
-  - update
-- apiGroups:
-  - demo.example.com
-  resources:
   - helloworlds/status
   verbs:
   - get

@@ -18,13 +18,15 @@ package controllers
 
 import (
 	"context"
+	demov1alpha1 "github.com/slintes/demo-operator/api/v1alpha1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
+	"sigs.k8s.io/cluster-api/util/patch"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
-
-	demov1alpha1 "github.com/slintes/demo-operator/api/v1alpha1"
+	"time"
 )
 
 // HelloWorldReconciler reconciles a HelloWorld object
@@ -35,7 +37,7 @@ type HelloWorldReconciler struct {
 
 //+kubebuilder:rbac:groups=demo.example.com,resources=helloworlds,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=demo.example.com,resources=helloworlds/status,verbs=get;update;patch
-//+kubebuilder:rbac:groups=demo.example.com,resources=helloworlds/finalizers,verbs=update
+// + k ubebuilder:rbac:groups=demo.example.com,resources=helloworlds/finalizers,verbs=update;patch
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
@@ -68,6 +70,48 @@ func (r *HelloWorldReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 	// Compare with cluster state and take appropriate action
 	logger.Info("Reconciling HelloWorld CR", "name", hw.GetName(), "message", hw.Spec.Message)
 
+	helper, err := patch.NewHelper(hw, r.Client)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	defer func() {
+		// Always attempt to Patch the Remediation object and status after each reconciliation.
+		// Patch ObservedGeneration only if the reconciliation completed successfully
+		patchOpts := []patch.Option{}
+		patchOpts = append(patchOpts, patch.WithStatusObservedGeneration{})
+
+		err := helper.Patch(ctx, hw, patchOpts...)
+		if err != nil {
+			logger.Error(err, "failed to Patch metal3Remediation")
+		}
+	}()
+
+	// TEST finalizer
+	// add and remove finalizer every few seconds...
+
+	testFinalizer := "example.com/test"
+	if !controllerutil.ContainsFinalizer(hw, testFinalizer) {
+		controllerutil.AddFinalizer(hw, testFinalizer)
+		hw.Annotations = map[string]string{
+			"test1": "test1",
+			"test2": "test2",
+		}
+		hw.Labels = map[string]string{
+			"test1": "test1",
+			"test2": "test2",
+		}
+	} else {
+		controllerutil.RemoveFinalizer(hw, testFinalizer)
+		hw.Annotations = map[string]string{
+			"test1": "test1",
+		}
+		hw.Labels = map[string]string{
+			"test1": "test1",
+		}
+	}
+
+	time.Sleep(5 * time.Second)
 	return ctrl.Result{}, nil
 }
 

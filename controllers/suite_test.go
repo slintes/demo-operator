@@ -56,9 +56,11 @@ var _ = BeforeSuite(func() {
 	testEnv = &envtest.Environment{
 		CRDDirectoryPaths:     []string{filepath.Join("..", "config", "crd", "bases")},
 		ErrorIfCRDPathMissing: true,
+		BinaryAssetsDirectory: "/home/msluiter/.local/share/kubebuilder-envtest/k8s/1.23.3-linux-amd64",
 	}
 
-	cfg, err := testEnv.Start()
+	var err error
+	cfg, err = testEnv.Start()
 	Expect(err).NotTo(HaveOccurred())
 	Expect(cfg).NotTo(BeNil())
 
@@ -70,6 +72,23 @@ var _ = BeforeSuite(func() {
 	k8sClient, err = client.New(cfg, client.Options{Scheme: scheme.Scheme})
 	Expect(err).NotTo(HaveOccurred())
 	Expect(k8sClient).NotTo(BeNil())
+
+	//k8sManager, err := ctrl.NewManager(cfg, ctrl.Options{
+	//	Scheme:             scheme.Scheme,
+	//	MetricsBindAddress: "0",
+	//})
+	//Expect(err).ToNot(HaveOccurred())
+	//
+	//err = (&HelloWorldReconciler{
+	//	Client: k8sManager.GetClient(),
+	//	Scheme: k8sManager.GetScheme(),
+	//}).SetupWithManager(k8sManager)
+	//Expect(err).ToNot(HaveOccurred())
+	//
+	//go func() {
+	//	err = k8sManager.Start(ctrl.SetupSignalHandler())
+	//	Expect(err).ToNot(HaveOccurred())
+	//}()
 
 }, 60)
 
